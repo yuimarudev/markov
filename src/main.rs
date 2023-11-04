@@ -1,13 +1,19 @@
 use actix_web::middleware::Logger;
-use actix_web::{get, App, HttpServer, Responder};
+use actix_web::{get, web, App, HttpRequest, HttpServer, Responder};
 use lindera_core::mode::Mode;
 use lindera_dictionary::{DictionaryConfig, DictionaryKind};
 use lindera_tokenizer::tokenizer::{Tokenizer, TokenizerConfig};
 use markov::Chain;
 use once_cell::sync::Lazy;
 use regex::*;
+use serde::Deserialize;
 use serde_json;
 use tokio::sync::RwLock;
+
+#[derive(Deserialize)]
+struct Query {
+  token: Option<String>,
+}
 
 static CHAIN: Lazy<RwLock<Chain<String>>> = Lazy::new(|| RwLock::new(Chain::new()));
 
@@ -58,8 +64,11 @@ async fn main() {
 }
 
 #[get("/")]
-async fn generate_sentence() -> impl Responder {
+async fn generate_sentence(query: web::Query<Query>) -> impl Responder {
   let lock = CHAIN.read().await;
 
-  lock.generate_str()
+  match &query.token {
+    Some(t) => lock.generate_str_from_token(&t),
+    None => lock.generate_str(),
+  }
 }
