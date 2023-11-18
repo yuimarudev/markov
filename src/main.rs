@@ -21,17 +21,6 @@ static CHAIN: Lazy<RwLock<Chain<String>>> = Lazy::new(|| RwLock::new(Chain::new(
 async fn main() {
   env_logger::init_from_env(env_logger::Env::new().default_filter_or("info"));
 
-  HttpServer::new(|| {
-    App::new()
-      .service(generate_sentence)
-      .wrap(Logger::default())
-  })
-  .bind(("0.0.0.0", 8931))
-  .unwrap()
-  .run()
-  .await
-  .unwrap();
-
   let messages = serde_json::from_str::<Vec<String>>(include_str!("main.json")).unwrap();
   let dictionary = DictionaryConfig {
     kind: Some(DictionaryKind::IPADIC),
@@ -63,6 +52,17 @@ async fn main() {
 
     drop(lock);
   }
+
+  HttpServer::new(|| {
+    App::new()
+      .service(generate_sentence)
+      .wrap(Logger::default())
+  })
+  .bind(("0.0.0.0", 8931))
+  .unwrap()
+  .run()
+  .await
+  .unwrap();
 }
 
 #[get("/")]
