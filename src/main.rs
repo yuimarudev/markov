@@ -32,10 +32,12 @@ async fn main() {
     mode: Mode::Normal,
   };
   let tokenizer = Tokenizer::from_config(tokenizer_config).unwrap();
-  let re = Regex::new(r#"<(a?:[a-zA-Z\-]+:\d{17,20})|((@|&)!?\d{17,20})>"#).unwrap();
+  let url = Regex::new(r#"/(?:[a-zA-Z][a-zA-Z0-9+.-]*:)(?://(?:([^:@/?#\[\]\s]+)(?::([^:@/?#\[\]\s]*))?@)?(?:\[(?:[0-9A-Fa-f]{1,4}:){6}|(?:(?:[0-9A-Fa-f]:){0,5}[0-9A-Fa-f]?::(?:[0-9A-Fa-f]:){0,4}[0-9A-Fa-f]{1,4}$)(?:[0-9A-Fa-f]{1,4}:){1,5}|::(?:[0-9A-Fa-f]{1,4}:){0,5}[0-9A-Fa-f]{1,4}:)?(?:[0-9A-Fa-f]{1,4}:)?(?:(?:25[0-5]|(?:2[0-4]|1\d|[1-9])?\d)(?:\.(?:25[0-5]|(?:2[0-4]|1\d|[1-9])?\d)){3}|(?:[0-9A-Fa-f]{1,4}:){0,4}(?:(?:25[0-5]|(?:2[0-4]|1\d|[1-9])?\d)(?:\.(?:25[0-5]|(?:2[0-4]|1\d|[1-9])?\d)){3})?|(?:(?:[0-9A-Fa-f]{1,4}:)?(?:25[0-5]|(?:2[0-4]|1\d|[1-9])?\d))(?:\.(?:25[0-5]|(?:2[0-4]|1\d|[1-9])?\d)){3}))\]|(?:[^:@/?#\[\]\s]+)(?::(\d*))?(/(?:[^\s?#]*))?(?:\?([^#]*))?(?:#(.*))?/"#).unwrap();
+  let mention = Regex::new(r#"(<a?(:[a-zA-Z_0-9]+:|(@|#)(!|&)?)\d+>)"#).unwrap();
 
   for message in messages {
-    let replaced = re.replace_all(&message, "");
+    let url_replaced = url.replace_all(&message, "");
+    let replaced = mention.replace_all(&url_replaced, "");
     let tokens = tokenizer.tokenize(&replaced).unwrap();
 
     let mut lock = CHAIN.write().await;
