@@ -1,5 +1,5 @@
 use actix_web::middleware::Logger;
-use actix_web::{get, web, App, HttpRequest, HttpServer, Responder};
+use actix_web::{get, web, App, HttpServer, Responder};
 use lindera_core::mode::Mode;
 use lindera_dictionary::{DictionaryConfig, DictionaryKind};
 use lindera_tokenizer::tokenizer::{Tokenizer, TokenizerConfig};
